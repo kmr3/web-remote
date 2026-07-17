@@ -111,10 +111,18 @@ export async function POST(request: Request) {
       );
       const successCount = results.filter((result) => result.status === "fulfilled").length;
       const failedCount = results.length - successCount;
+      const successDeviceIds = batchAction.deviceIds.filter(
+        (_deviceId, index) => results[index]?.status === "fulfilled",
+      );
       if (failedCount > 0) {
         console.warn(`[SwitchBot] Batch OFF partially failed (${failedCount}/${results.length})`);
       }
-      return Response.json({ failedCount, ok: failedCount === 0, successCount });
+      return Response.json({
+        failedCount,
+        ok: failedCount === 0,
+        successCount,
+        successDeviceIds,
+      });
     }
 
     if (payload.action === "save-selection") {

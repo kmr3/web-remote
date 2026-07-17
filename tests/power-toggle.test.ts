@@ -9,7 +9,7 @@ const controls = [
 
 describe("resolvePowerToggle", () => {
   it("turns an on light off", () => {
-    expect(resolvePowerToggle({ controls, type: "Light" }, "on")).toMatchObject({
+    expect(resolvePowerToggle({ controls, isInfrared: false, type: "Light" }, "on")).toMatchObject({
       control: { command: "turnOff" },
       label: "ON",
       state: "on",
@@ -17,7 +17,7 @@ describe("resolvePowerToggle", () => {
   });
 
   it("shows an unknown light state and uses ON as the first action", () => {
-    expect(resolvePowerToggle({ controls, type: "Light" })).toMatchObject({
+    expect(resolvePowerToggle({ controls, isInfrared: false, type: "Light" })).toMatchObject({
       control: { command: "turnOn" },
       label: "不明",
       nextLabel: "ON",
@@ -27,5 +27,9 @@ describe("resolvePowerToggle", () => {
 
   it("does not turn an air conditioner into a power toggle", () => {
     expect(resolvePowerToggle({ controls, type: "Air Conditioner" }, "off")).toBeNull();
+  });
+
+  it("keeps both controls visible for an infrared light", () => {
+    expect(resolvePowerToggle({ controls, isInfrared: true, type: "Light" }, "on")).toBeNull();
   });
 });

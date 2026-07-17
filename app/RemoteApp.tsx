@@ -236,17 +236,24 @@ export function RemoteApp() {
   async function runBatchAction(batchAction: BatchActionSummary) {
     setBusyId(`batch:${batchAction.actionId}`);
     try {
-      const result = await request<{ failedCount: number; successCount: number }>(
-        "/api/switchbot",
-        {
-          body: JSON.stringify({
-            action: "run-batch-action",
-            actionId: batchAction.actionId,
-          }),
-          method: "POST",
-        },
-      );
-      await loadHome(undefined, true);
+      const result = await request<{
+        failedCount: number;
+        successCount: number;
+        successDeviceIds: string[];
+      }>("/api/switchbot", {
+        body: JSON.stringify({
+          action: "run-batch-action",
+          actionId: batchAction.actionId,
+        }),
+        method: "POST",
+      });
+      setStatusByDevice((current) => {
+        const next = { ...current };
+        for (const deviceId of result.successDeviceIds) {
+          next[deviceId] = { ...next[deviceId], power: "off" };
+        }
+        return next;
+      });
       if (result.failedCount > 0) {
         showToast(`${result.successCount}台をOFF、${result.failedCount}台は失敗しました。`, true);
       } else {
@@ -528,7 +535,7 @@ export function RemoteApp() {
                       power: device.power,
                     };
                     const powerToggle = resolvePowerToggle(device, deviceStatus.power);
-                    const stateLabel = statusLabel(deviceStatus);
+                    const stateLabel = displayStatusLabel(device, deviceStatus);
                     return (
                       <article className="device-card" key={device.deviceId}>
                         <div className="device-main">
@@ -853,6 +860,11 @@ function statusLabel(status: DeviceStatus | undefined): string {
   if (status?.lockState) return "状態不明";
   if (status?.power) return status.power.toLowerCase() === "on" ? "オン" : "オフ";
   return "";
+}
+
+function displayStatusLabel(device: RemoteDevice, status: DeviceStatus | undefined): string {
+  if (device.isInfrared) return "";
+  return statusLabel(status);
 }
 
 function statusClass(status: DeviceStatus | undefined): string {

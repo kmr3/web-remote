@@ -12,10 +12,10 @@ export type PowerToggle<T extends CommandControl> = {
 };
 
 export function resolvePowerToggle<T extends CommandControl>(
-  device: { controls: T[]; type: string },
+  device: { controls: T[]; isInfrared?: boolean; type: string },
   power?: string,
 ): PowerToggle<T> | null {
-  if (!supportsPowerToggle(device.type)) return null;
+  if (!supportsPowerToggle(device)) return null;
 
   const normalizedPower = power?.toLowerCase();
   const state: PowerToggleState =
@@ -32,6 +32,7 @@ export function resolvePowerToggle<T extends CommandControl>(
   };
 }
 
-function supportsPowerToggle(type: string): boolean {
-  return /^(Bot|Light|Color Bulb|Plug(?: Mini)?)/i.test(type);
+function supportsPowerToggle(device: { isInfrared?: boolean; type: string }): boolean {
+  if (device.isInfrared) return false;
+  return /^(Bot|Light|Color Bulb|Plug(?: Mini)?)/i.test(device.type);
 }
