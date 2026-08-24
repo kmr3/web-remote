@@ -9,7 +9,7 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "SwitchBot Home",
-  description: "ローカルネットワーク用のSwitchBotリモコン",
+  description: "アクセスコードで保護されたスマートホームリモコン",
 };
 
 export const viewport: Viewport = {

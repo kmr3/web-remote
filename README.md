@@ -21,6 +21,7 @@ SWITCHBOT_TOKEN=your-token
 SWITCHBOT_SECRET=your-secret
 OWNER_PIN=your-owner-access-code
 GUEST_PIN=your-guest-access-code
+PUBLIC_UNTIL=
 SESAME_API_KEY=your-sesame-api-key
 SESAME_DEVICE_UUID=your-sesame-uuid
 SESAME_SECRET_KEY=your-32-character-hex-secret
@@ -36,6 +37,10 @@ SESAMEの解錠操作は管理者だけに表示され、利用者は状態確�
 
 `OWNER_PIN` または従来の `REMOTE_PIN` は必須です。
 インターネットへのポート開放はしないでください。
+
+一時公開する場合は、APIキーとPINを公開先のサーバー環境変数として保存し、
+`PUBLIC_UNTIL` にISO 8601形式の期限（例: `2026-08-27T12:00:00+09:00`）を設定します。
+期限に達すると、正しいアクセスコードでもAPI操作は拒否されます。
 
 ## Available Controls
 

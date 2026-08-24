@@ -6,7 +6,12 @@ import {
 } from "@/db/batch-actions";
 import { isPublished, readPublishedSelection, replacePublishedSelection } from "@/db/selection";
 import { readDevicePowerStates, saveDevicePowerState } from "@/db/device-power-state";
-import { authenticateRequest, AuthConfigurationError, type UserRole } from "@/lib/auth";
+import {
+  AccessExpiredError,
+  authenticateRequest,
+  AuthConfigurationError,
+  type UserRole,
+} from "@/lib/auth";
 import { batchEligibleDevices, normalizeBatchActionInput } from "@/lib/batch-actions";
 import { buildHomeResponse } from "@/lib/home-access";
 import {
@@ -237,6 +242,9 @@ async function authorize(request: Request): Promise<{ role: UserRole } | Respons
       { status: 401 },
     );
   } catch (error) {
+    if (error instanceof AccessExpiredError) {
+      return Response.json({ code: "access-expired", error: error.message }, { status: 410 });
+    }
     if (error instanceof AuthConfigurationError) {
       return Response.json({ code: "owner-pin-missing", error: error.message }, { status: 503 });
     }

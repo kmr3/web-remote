@@ -1,13 +1,22 @@
 export type UserRole = "guest" | "owner";
 
+export class AccessExpiredError extends Error {
+  constructor() {
+    super("この公開リモコンの利用期限は終了しました。");
+    this.name = "AccessExpiredError";
+  }
+}
+
 export class AuthConfigurationError extends Error {
   constructor() {
-    super("Mac側にOWNER_PINが設定されていません。");
+    super("サーバー側にOWNER_PINが設定されていません。");
     this.name = "AuthConfigurationError";
   }
 }
 
 export async function authenticateRequest(request: Request): Promise<UserRole | null> {
+  if (publicAccessIsExpired()) throw new AccessExpiredError();
+
   const ownerPin = ownerAccessCode();
   if (!ownerPin) throw new AuthConfigurationError();
 
@@ -19,6 +28,15 @@ export async function authenticateRequest(request: Request): Promise<UserRole | 
 
 export function ownerAccessCodeIsConfigured(): boolean {
   return Boolean(ownerAccessCode());
+}
+
+export function publicAccessIsExpired(
+  now = Date.now(),
+  publicUntil = process.env.PUBLIC_UNTIL?.trim(),
+): boolean {
+  if (!publicUntil) return false;
+  const expiresAt = Date.parse(publicUntil);
+  return !Number.isFinite(expiresAt) || now >= expiresAt;
 }
 
 function ownerAccessCode(): string | undefined {
